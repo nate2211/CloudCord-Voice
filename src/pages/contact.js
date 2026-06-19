@@ -27,7 +27,6 @@ import {
     LocalPhone,
     NetworkCheck,
     SupportAgent,
-    Terminal,
     Troubleshoot,
 } from '@mui/icons-material';
 
