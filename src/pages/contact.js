@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import {
     Box,
     Button,
@@ -6,6 +8,8 @@ import {
     Chip,
     Container,
     Divider,
+    Link,
+    MenuItem,
     Paper,
     Stack,
     TextField,
@@ -16,46 +20,190 @@ import {
     AlternateEmail,
     ArrowForward,
     AssignmentTurnedIn,
-    CalendarMonth,
-    ContactSupport,
+    CloudQueue,
+    Code,
     FactCheck,
     HeadsetMic,
     LocalPhone,
-    ManageSearch,
     NetworkCheck,
-    Place,
+    SupportAgent,
     Terminal,
+    Troubleshoot,
 } from '@mui/icons-material';
 
-const contactCards = [
+const WEB3FORMS_ACCESS_KEY = '35829ef1-413d-41d1-92cb-d6351aa427a9';
+
+const contactEmail = 'cloudcordvoice@protonmail.com';
+
+const contactReceivers = [
+    'cloudcordvoice@protonmail.com',
+    'unusualsuspectsclothing@gmail.com',
+];
+
+const servicePills = [
+    { label: 'AWS support', icon: <CloudQueue /> },
+    { label: 'VoIP setup', icon: <LocalPhone /> },
+    { label: 'Freshservice workflows', icon: <SupportAgent /> },
+    { label: 'Node/Python automation', icon: <Code /> },
+    { label: 'Network troubleshooting', icon: <Troubleshoot /> },
+];
+
+const serviceOptions = [
+    'AWS support',
+    'VoIP setup',
+    'Freshservice workflow',
+    'Node/Python automation',
+    'Network troubleshooting',
+    'Not sure yet',
+];
+
+const quickCards = [
     {
-        title: 'Request a Flat-Rate Scope',
-        description:
-            'Tell us what system you need fixed or built. We define the deliverables before quoting.',
-        icon: <ManageSearch />,
+        title: 'Fast quote request',
+        description: 'Send a short message. We can ask follow-up questions after we review it.',
+        icon: <FactCheck />,
     },
     {
-        title: 'Start a VoIP or Ticketing Build',
-        description:
-            'Best for Teams Phone, Zoom Phone, Google Voice, Freshservice, calendars, or support workflows.',
-        icon: <LocalPhone />,
+        title: 'Flat-rate scope',
+        description: 'We define a clear project with deliverables before starting the work.',
+        icon: <AssignmentTurnedIn />,
     },
     {
-        title: 'Request a Network Diagnostic',
-        description:
-            'Best for packet capture basics, Wireshark review, DNS, firewall, NAT, ping, or traceroute work.',
+        title: 'Remote-first support',
+        description: 'AWS, VoIP, ticketing, workflow, automation, and diagnostics can usually start remotely.',
         icon: <NetworkCheck />,
     },
 ];
 
+function ResponsivePillGrid() {
+    return (
+        <Box
+            sx={{
+                display: 'grid',
+                gridTemplateColumns: {
+                    xs: '1fr',
+                    sm: 'repeat(2, minmax(0, 1fr))',
+                    md: 'repeat(3, minmax(0, 1fr))',
+                    xl: 'repeat(5, minmax(0, 1fr))',
+                },
+                gap: 1.25,
+                width: '100%',
+            }}
+        >
+            {servicePills.map((pill) => (
+                <Paper
+                    key={pill.label}
+                    elevation={0}
+                    sx={{
+                        minHeight: 58,
+                        px: 1.5,
+                        py: 1.25,
+                        borderRadius: 3,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        bgcolor: 'background.paper',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                    }}
+                >
+                    <Box
+                        sx={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: 2,
+                            display: 'grid',
+                            placeItems: 'center',
+                            bgcolor: 'primary.main',
+                            color: 'primary.contrastText',
+                            flexShrink: 0,
+                        }}
+                    >
+                        {pill.icon}
+                    </Box>
+
+                    <Typography sx={{ fontWeight: 900, lineHeight: 1.2 }}>
+                        {pill.label}
+                    </Typography>
+                </Paper>
+            ))}
+        </Box>
+    );
+}
+
 function Contact() {
+    const [status, setStatus] = useState({
+        loading: false,
+        error: '',
+        success: '',
+    });
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        const formElement = event.currentTarget;
+        const formData = new FormData(formElement);
+
+        if (formData.get('botcheck')) {
+            setStatus({
+                loading: false,
+                error: '',
+                success: 'Message sent.',
+            });
+
+            formElement.reset();
+            return;
+        }
+
+        formData.append('access_key', WEB3FORMS_ACCESS_KEY);
+        formData.append('subject', 'New CloudCord Voice Contact Request');
+        formData.append('from_name', 'CloudCord Voice Website');
+        formData.append('replyto', String(formData.get('email') || ''));
+        formData.append('ccemail', contactReceivers.join('; '));
+
+        setStatus({
+            loading: true,
+            error: '',
+            success: '',
+        });
+
+        try {
+            const response = await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || 'Unable to send message.');
+            }
+
+            formElement.reset();
+
+            setStatus({
+                loading: false,
+                error: '',
+                success: 'Message sent. We will review it and follow up.',
+            });
+        } catch (error) {
+            setStatus({
+                loading: false,
+                error:
+                    error.message ||
+                    `Something went wrong. Please email ${contactEmail} directly.`,
+                success: '',
+            });
+        }
+    };
+
     return (
         <Box>
-            <Container maxWidth="xl" sx={{ py: { xs: 8, md: 10 } }}>
-                <Stack spacing={2.5} sx={{ maxWidth: 950 }}>
+            <Container maxWidth="xl" sx={{ py: { xs: 7, md: 10 } }}>
+                <Stack spacing={3} sx={{ maxWidth: 1050 }}>
                     <Chip
                         icon={<HeadsetMic />}
-                        label="Request a fixed-scope project"
+                        label="Contact CloudCord Voice"
                         color="primary"
                         sx={{ width: 'fit-content', fontWeight: 900 }}
                     />
@@ -64,72 +212,88 @@ function Contact() {
                         variant="h2"
                         sx={{
                             fontWeight: 950,
-                            letterSpacing: -1.8,
+                            letterSpacing: { xs: -1, md: -1.8 },
                             lineHeight: 1,
                         }}
                     >
-                        Tell us what needs to be built, connected, diagnosed, or handed off.
+                        Contact Us / Request a Quote
                     </Typography>
 
                     <Typography variant="h6" color="text.secondary" sx={{ lineHeight: 1.75 }}>
-                        CloudCord Voice quotes work as a flat-rate project whenever possible.
-                        We define the scope, complete the work, test the result, and deliver
-                        documentation so the contract can close cleanly.
+                        Send a short message about what you need built, connected, diagnosed, or handed off.
+                        We keep the first contact simple so you do not have to write a full project brief.
                     </Typography>
+
+                    <ResponsivePillGrid />
                 </Stack>
             </Container>
 
-            <Container maxWidth="xl" sx={{ pb: 10 }}>
+            <Container maxWidth="xl" sx={{ pb: { xs: 7, md: 10 } }}>
                 <Box
                     sx={{
                         display: 'grid',
                         gridTemplateColumns: {
                             xs: '1fr',
-                            lg: '0.9fr 1.1fr',
+                            lg: '0.85fr 1.15fr',
                         },
-                        gap: 3,
+                        gap: { xs: 2.5, md: 3 },
+                        alignItems: 'stretch',
                     }}
                 >
                     <Stack spacing={2.5}>
-                        {contactCards.map((card) => (
-                            <Card
-                                key={card.title}
-                                elevation={0}
-                                sx={{
-                                    borderRadius: 4,
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    bgcolor: 'background.paper',
-                                }}
-                            >
-                                <CardContent>
-                                    <Stack direction="row" spacing={1.5}>
-                                        <Box
-                                            sx={{
-                                                width: 52,
-                                                height: 52,
-                                                borderRadius: 3,
-                                                display: 'grid',
-                                                placeItems: 'center',
-                                                bgcolor: 'primary.main',
-                                            }}
-                                        >
-                                            {card.icon}
-                                        </Box>
+                        <Box
+                            sx={{
+                                display: 'grid',
+                                gridTemplateColumns: {
+                                    xs: '1fr',
+                                    sm: 'repeat(3, minmax(0, 1fr))',
+                                    lg: '1fr',
+                                },
+                                gap: 2,
+                            }}
+                        >
+                            {quickCards.map((card) => (
+                                <Card
+                                    key={card.title}
+                                    elevation={0}
+                                    sx={{
+                                        borderRadius: 4,
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        bgcolor: 'background.paper',
+                                        height: '100%',
+                                    }}
+                                >
+                                    <CardContent>
+                                        <Stack spacing={1.5}>
+                                            <Box
+                                                sx={{
+                                                    width: 50,
+                                                    height: 50,
+                                                    borderRadius: 3,
+                                                    display: 'grid',
+                                                    placeItems: 'center',
+                                                    bgcolor: 'primary.main',
+                                                    color: 'primary.contrastText',
+                                                }}
+                                            >
+                                                {card.icon}
+                                            </Box>
 
-                                        <Box>
-                                            <Typography variant="h6" sx={{ fontWeight: 950 }}>
-                                                {card.title}
-                                            </Typography>
+                                            <Box>
+                                                <Typography variant="h6" sx={{ fontWeight: 950 }}>
+                                                    {card.title}
+                                                </Typography>
 
-                                            <Typography color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                                                {card.description}
-                                            </Typography>
-                                        </Box>
-                                    </Stack>
-                                </CardContent>
-                            </Card>
-                        ))}
+                                                <Typography color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                                                    {card.description}
+                                                </Typography>
+                                            </Box>
+                                        </Stack>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </Box>
 
                         <Paper
                             elevation={0}
@@ -143,45 +307,27 @@ function Contact() {
                         >
                             <Stack spacing={2}>
                                 <Typography variant="h6" sx={{ fontWeight: 950 }}>
-                                    What happens after you submit?
+                                    Direct email
                                 </Typography>
 
                                 <Divider />
 
                                 <Stack direction="row" spacing={1.5} alignItems="center">
-                                    <FactCheck color="primary" />
-                                    <Typography color="text.secondary">
-                                        We review your current software, network, and support workflow.
-                                    </Typography>
+                                    <AlternateEmail color="primary" />
+                                    <Link
+                                        href={`mailto:${contactEmail}`}
+                                        underline="hover"
+                                        color="inherit"
+                                        sx={{ fontWeight: 900, wordBreak: 'break-word' }}
+                                    >
+                                        {contactEmail}
+                                    </Link>
                                 </Stack>
 
-                                <Stack direction="row" spacing={1.5} alignItems="center">
-                                    <AssignmentTurnedIn color="primary" />
-                                    <Typography color="text.secondary">
-                                        We define a fixed project scope with clear deliverables.
-                                    </Typography>
-                                </Stack>
-
-                                <Stack direction="row" spacing={1.5} alignItems="center">
-                                    <Terminal color="primary" />
-                                    <Typography color="text.secondary">
-                                        If needed, we include Node.js, Python, or webhook automation in the quote.
-                                    </Typography>
-                                </Stack>
-
-                                <Stack direction="row" spacing={1.5} alignItems="center">
-                                    <CalendarMonth color="primary" />
-                                    <Typography color="text.secondary">
-                                        We deliver final documentation, test notes, and admin handoff.
-                                    </Typography>
-                                </Stack>
-
-                                <Stack direction="row" spacing={1.5} alignItems="center">
-                                    <Place color="primary" />
-                                    <Typography color="text.secondary">
-                                        Remote-first project delivery.
-                                    </Typography>
-                                </Stack>
+                                <Typography color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                                    Use the form for the fastest quote request, or email us directly if
+                                    you already have notes, screenshots, or project details ready.
+                                </Typography>
                             </Stack>
                         </Paper>
                     </Stack>
@@ -199,54 +345,70 @@ function Contact() {
                         <Stack spacing={2.5}>
                             <Box>
                                 <Typography variant="overline" color="primary" sx={{ fontWeight: 950 }}>
-                                    Project Request
+                                    Simple Contact Form
                                 </Typography>
 
                                 <Typography variant="h4" sx={{ fontWeight: 950 }}>
-                                    Request a flat-rate CloudCord Voice quote.
+                                    Tell us what you need.
                                 </Typography>
 
                                 <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>
-                                    This form is front-end only for now. Later you can connect it to
-                                    Formspree, EmailJS, a backend API, Freshservice, Microsoft Forms,
-                                    or a CRM.
+                                    Only the basics are required. We will follow up for the details needed
+                                    to build a flat-rate scope.
                                 </Typography>
                             </Box>
 
-                            <Box
-                                component="form"
-                                onSubmit={(event) => {
-                                    event.preventDefault();
-                                    alert('Project request submitted. Connect this form to a backend or form provider next.');
-                                }}
-                            >
+                            <Box component="form" onSubmit={handleSubmit}>
                                 <Stack spacing={2}>
-                                    <TextField label="Name" placeholder="Your name" />
-
-                                    <TextField label="Business Email" placeholder="you@company.com" />
-
-                                    <TextField label="Company" placeholder="Business name" />
-
                                     <TextField
-                                        label="Project Type"
-                                        placeholder="VoIP setup, Freshservice workflow, network diagnostic, webhook automation, Node/Python script, etc."
+                                        name="name"
+                                        label="Name"
+                                        placeholder="Your name"
+                                        required
+                                        fullWidth
                                     />
 
                                     <TextField
-                                        label="Current Tools"
-                                        placeholder="Freshservice, Microsoft 365, Slack, Google Calendar, Outlook Calendar, Teams Phone, Zoom Phone, Google Voice, etc."
+                                        name="email"
+                                        label="Email"
+                                        placeholder="you@company.com"
+                                        type="email"
+                                        required
+                                        fullWidth
                                     />
 
                                     <TextField
-                                        label="Main Problem"
-                                        placeholder="Missed calls, no ticket ownership, bad call quality, DNS/firewall issue, calendar handoff problem, manual workflow, etc."
-                                    />
+                                        name="service"
+                                        label="What do you need help with?"
+                                        defaultValue="Not sure yet"
+                                        select
+                                        fullWidth
+                                    >
+                                        {serviceOptions.map((option) => (
+                                            <MenuItem key={option} value={option}>
+                                                {option}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
 
                                     <TextField
-                                        label="Project Details"
-                                        placeholder="Describe what needs to be built, connected, diagnosed, automated, or handed off."
+                                        name="message"
+                                        label="Message"
+                                        placeholder="Example: We need help setting up AWS DNS, a VoIP call flow, Freshservice tickets, or a small automation."
                                         multiline
                                         minRows={5}
+                                        required
+                                        fullWidth
+                                    />
+
+                                    <TextField
+                                        name="botcheck"
+                                        label="Bot Check"
+                                        sx={{ display: 'none' }}
+                                        inputProps={{
+                                            tabIndex: -1,
+                                            autoComplete: 'off',
+                                        }}
                                     />
 
                                     <Button
@@ -254,9 +416,28 @@ function Contact() {
                                         variant="contained"
                                         size="large"
                                         endIcon={<ArrowForward />}
+                                        disabled={status.loading}
+                                        sx={{ width: { xs: '100%', sm: 'fit-content' } }}
                                     >
-                                        Request Flat-Rate Quote
+                                        {status.loading ? 'Sending...' : 'Send Message'}
                                     </Button>
+
+                                    {status.error && (
+                                        <Typography color="error" sx={{ fontWeight: 800 }}>
+                                            {status.error}
+                                        </Typography>
+                                    )}
+
+                                    {status.success && (
+                                        <Typography color="success.main" sx={{ fontWeight: 800 }}>
+                                            {status.success}
+                                        </Typography>
+                                    )}
+
+                                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                                        This form sends through Web3Forms, so no SMTP server, local backend,
+                                        or always-on computer is required.
+                                    </Typography>
                                 </Stack>
                             </Box>
                         </Stack>
