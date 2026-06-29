@@ -18,6 +18,7 @@ import {
     InfoRounded,
     MiscellaneousServicesRounded,
     MailRounded,
+    PhoneInTalk,
 } from '@mui/icons-material';
 
 import Home from './pages/home';
@@ -25,6 +26,7 @@ import About from './pages/about';
 import Services from './pages/services';
 import Contact from './pages/contact';
 import Projects from './pages/projects';
+import Voice from './pages/voice';
 
 const navLinks = [
     {
@@ -47,6 +49,11 @@ const navLinks = [
         label: 'Projects',
         href: '/projects',
         icon: <Code />,
+    },
+    {
+        label: 'Voice Call',
+        href: '/voice-call',
+        icon: <PhoneInTalk />,
     },
     {
         label: 'Contact',
@@ -235,6 +242,7 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/projects" element={<Projects />} />
+                <Route path="/voice-call" element={<Voice />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>

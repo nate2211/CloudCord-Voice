@@ -1,6 +1,13 @@
-name = "cloudcordvoice"
-compatibility_date = "2026-06-22"
+name = "cloudcord-voice-signaling"
+main = "worker/voice-signaling-worker.js"
+compatibility_date = "2026-06-28"
 
-[assets]
-directory = "./build"
-not_found_handling = "single-page-application"
+workers_dev = true
+
+[[durable_objects.bindings]]
+name = "VOICE_ROOMS"
+class_name = "VoiceRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["VoiceRoom"]
